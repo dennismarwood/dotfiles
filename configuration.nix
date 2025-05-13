@@ -18,34 +18,6 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Have mdadm check the disks are in sync monthly
-  #  systemd.timers."mdadm-checkarray" = {
-  #    wantedBy = [ "timers.target" ];
-  #    timerConfig = {
-  #      OnBootSec = "10min"; #10 minutes after boot
-  #      OnUnitActiveSec = "1month"; #Re-run only after a succesful check
-  #      Persistent = true;
-  #    };
-  #  };
-
-  #  systemd.services."mdadm-checkarray" = {
-  #    script = ''
-  #      /run/current-system/sw/bin/mdadm --check /dev/md127
-  #    '';
-  #    serviceConfig = {
-  #      Type = "oneshot";
-  #      Nice = 19;
-  #      IOSchedulingClass = "idle";
-  #    };
-  #    after = [ "local-fs.target" ];
-  #     wants = [ "local-fs.target" ];
-  #  };
-
-  # Just going to do manual checks for now. Waiting on merge of 
-  # https://github.com/NixOS/nixpkgs/pull/204713
-  # https://github.com/NixOS/nixpkgs/pull/373222
-
-
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
