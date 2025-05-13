@@ -105,10 +105,6 @@
 
   #security.unprivilegedUsernsClone = true; #Major security hole (recommended by chatgpt)
 
-  # Install firefox.
-  #programs.firefox.enable = true;
-  
-
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -138,25 +134,6 @@
 #      ];
 #    };
 #  };
-
-  # adding a line to try and have the mdadm service start automatically
-  #boot.initrd.mdadm.enable = true;
-  #services.mdadm = {
-    #enable = true;
-  #};
-  #services.mdadm.enable = true;
-
-  # trying to mount the raid disks
-  fileSystems."/mnt/raid" = {
-    device = "/dev/disk/by-uuid/79155689-315b-4bed-8b94-de3c176dfd4e";
-    fsType = "ext4";
-    options = [ "nofail" ]; #Boot even if mount fails
-  };
-  fileSystems."/mnt/data" = {
-   device = "/dev/disk/by-uuid/daddf5af-2e48-41f7-a559-9879586ec75f";
-   fsType = "ext4";
-   options = [ "nofail" ]; #Boot even if mount fails
-  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
