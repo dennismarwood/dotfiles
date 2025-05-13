@@ -1,0 +1,23 @@
+# Ignore everything
+*
+
+# Allow tracked files
+!.gitignore
+!bootstrap.sh
+!configuration.nix
+!READ.ME
+
+# Allow tracked folders
+!hardware_configs/
+!home-manager/
+!nixpkgs/
+
+# Inside allowed directories, ignore everything again
+hardware_configs/*
+home-manager/*
+nixpkgs/*
+
+# Then explicitly allow only desired files inside
+!hardware_configs/*_hardware-configuration.nix
+!home-manager/home.nix
+!nixpkgs/config.nix
