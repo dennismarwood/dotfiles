@@ -13,15 +13,6 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.swraid.enable = true;
-
-  #MakeMKV needs the scsi generic devices
-  boot.kernelModules = [ "sg" ];
-
-  # Override mdmonitor to log to syslog instead of emailing or alerting
-  systemd.services."mdmonitor".environment = {
-    MDADM_MONITOR_ARGS = "--scan --syslog";
-  };
 
   # Have mdadm check the disks are in sync monthly
   #  systemd.timers."mdadm-checkarray" = {
