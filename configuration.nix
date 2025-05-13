@@ -2,6 +2,10 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
+# Note: This configuration.nix is machine-independent.
+# Hardware-specific options (RAID, fileSystems, CPU modules, etc.) live in:
+# # /etc/nixos/hardware-configuration.nix → symlinked from ./hardware_configs/<machine>.nix
+
 { config, pkgs, ... }:
 
 {
