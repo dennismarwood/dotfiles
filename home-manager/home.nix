@@ -34,6 +34,7 @@
     #libburn # alternative burning backend
     makemkv
     #nvtop #GPU monitoring for amd intel nvidia apple. See also radeontop nvtop
+    pciutils
     qalculate-gtk
     #s-tui #Stress test new system
     spotify
