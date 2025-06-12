@@ -20,28 +20,57 @@
   home.packages = with pkgs; [
     brave
     btop #very nice top alternative
+    pkgs.cargo         # Rust Package manager
     cdrtools # general disc burning tools
+    certbot
     #dvd+rw-tools # for DVD burning
     discord
+    dmidecode
     docker-compose
+    drawio
+    epson-escpr
+    gcc #C Compiler
     git
+    gnome-boxes
+    gparted
+    gutenprint
     #htop #cpu focused top alternative
     #iftop #network device traffic monitor
-    #iotop #disk drive io usage monitor. additional sysdig and csysdig for more indepth
+    iotop #disk drive io usage monitor. additional sysdig and csysdig for more indepth
     libaacs
     libbdplus
     libbluray
     #libburn # alternative burning backend
+    libreoffice
     makemkv
     #nvtop #GPU monitoring for amd intel nvidia apple. See also radeontop nvtop
     pciutils
+    pkg-config #Used by some rust crates to build c scripts
+    (pkgs.python3.withPackages (ps: with ps; [
+      google-api-python-client
+      google-auth
+      google-auth-oauthlib
+      google-auth-httplib2
+    ]))
     qalculate-gtk
-    #s-tui #Stress test new system
+    qdirstat
+    #rclone
+    realvnc-vnc-viewer
+    rustc         # Rust compiler
+    rustdesk
+    s-tui #Stress test new system
+    simple-scan
+    stress
+    smartmontools
     spotify
+    tailscale #The CLI, not the daemon (that is in configuration.nix)
     udftools # for UDF file systems (common on DVDs/Blu-ray)
+    virt-manager
     vlc
     vscode
     wget
+    xfce.thunar-archive-plugin
+    xarchiver
 
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
@@ -85,17 +114,52 @@
 
   };
 
+
   programs.ssh = {
     enable = true; # start the ssh-agent
+    addKeysToAgent = "yes";
+
+    matchBlocks = {
+      "officepi" = {
+        hostname = "192.168.2.10";
+        user = "pi-office";
+        port = 22;
+        localForwards = [
+          {
+            # Format: bindAddress = "local-port remote-host:remote-port"
+            bind.address = "127.0.0.1";   # Just the IP or hostname
+            bind.port = 5900;             # Local port to bind
+            host.address = "localhost";          # Remote destination host
+            host.port = 5900;                 # Remote destination port
+          }
+        ];
+        extraOptions = {
+          ControlMaster = "auto";
+          ControlPath = "~/.ssh/cm-%r@%h:%p";
+          ControlPersist = "10m";
+        };
+      };
+    };
+
     # the next line will effectively include raw SSH config text in ~/.ssh/config
     extraConfig = ''
-      AddKeysToAgent yes 
       IdentityFile ~/.ssh/id_ed25519
     '';
   };
 
   programs.vim.enable = true;
-  programs.vscode.enable = true;
+
+  programs.vscode = {
+    enable = true;
+    profiles.default.extensions = with pkgs.vscode-extensions; [
+      eamodio.gitlens
+      jnoortheen.nix-ide
+      ms-vscode-remote.remote-ssh
+      ms-azuretools.vscode-docker
+      #ms-vscode.vscode-container-tools
+      tailscale.vscode-tailscale
+    ];
+  };
 
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
