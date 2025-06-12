@@ -9,6 +9,7 @@
 { config, pkgs, ... }:
 
 {
+
   imports =
     [ # Include the results of the hardware scan.
       /etc/nixos/hardware-configuration.nix
@@ -46,6 +47,25 @@
     LC_TIME = "en_US.UTF-8";
   };
 
+  #Enable scrutiny service. https://search.nixos.org/options?channel=unstable&show=services.scrutiny.influxdb.enable&from=0&size=50&sort=relevance&type=packages&query=services.scrutiny.
+  services.scrutiny = {
+    enable = true;
+    settings.log.level = "INFO"; #INFO or DEBUG
+    collector.schedule = "*:0/15"; #How often to run the collector in systemd calendar format 
+    settings.web.listen.port = 8080; #Port web app listens on.
+    settings.web.listen.host = "0.0.0.0"; #Interface address for web app to bind to.
+  };
+
+  services.clamav.daemon.enable = true;
+  services.clamav.updater.enable = true; # for freshclam
+  
+  services.spice-vdagentd.enable = true;
+
+  services.tailscale = {
+    enable = true;
+    useRoutingFeatures = "both";  # optional: enables subnet & exit node support
+  };
+
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
@@ -55,7 +75,11 @@
 
   services.udisks2.enable = true; # automount optical drive
 
-  nix.settings.experimental-features = [ "nix-command" ];
+  #Enable network scan for printers
+  services.avahi.enable = true;
+  services.avahi.nssmdns = true;
+  
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -92,6 +116,14 @@
     #media-session.enable = true;
   };
 
+  services.smartd = {
+    enable = true;
+    autodetect = true; # Automatically monitors all SMART-capable devices
+    notifications = {
+      mail.enable = false;  # Can configure if you want email alerts
+    };
+  };
+
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
@@ -99,7 +131,7 @@
   users.users.dennis = {
     isNormalUser = true;
     description = "Dennis";
-    extraGroups = [ "networkmanager" "wheel" "docker" "cdrom" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "cdrom" "libvirt" "kvm" "plugdev" ];
     linger = true; #User services (such as rootless docker) can run after logout or before login
   };
 
@@ -112,8 +144,14 @@
   # $ nix search wget
   #atop #Performace checking tool for what could be slowing down a system
   environment.systemPackages = with pkgs; [
+    acl
     cockpit
     mdadm
+    scrutiny
+    spice-gtk
+    usbredir
+    virt-manager
+    virt-viewer
     vim 
   ];
 
@@ -122,18 +160,8 @@
     setSocketVariable = true;
   };
 
-#  systemd.user.services.docker = {
-#    description = "Rootless Docker Daemon";
-#    wantedBy = [ "multi-user.target" ]; # start this service at boot
-#    serviceConfig = {
-#      ExecStart = "${pkgs.docker}/bin/dockerd-rootless.sh";
-#      Restart = "always";
-#      Environment = [
-#        "PATH=${pkgs.docker}/bin:/run/wrappers/bin:/usr/bin:/bin"
-#        "DOCKER_HOST=unix:///run/user/1000/docker.sock"
-#      ];
-#    };
-#  };
+  #Support for gnome-boxes
+  virtualisation.libvirtd.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -149,10 +177,32 @@
   # services.openssh.enable = true;
 
   # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  networking.firewall.allowedTCPPorts = 
+    [ 
+      5050  # my python program calendar writer listens for entries to add to the calendar here
+      8080  # scrutiny
+      8081  # nginx http
+      8082  # nginx https
+      8096  # jellyfin
+            # rustdesk-server https://rustdesk.com/docs/en/self-host/rustdesk-server-oss/docker/
+      21115 # (TCP): used for the NAT type test.
+      21116 # is used for TCP hole punching and connection service
+      21117 # used for the Relay services
+      21118 # used to support web clients
+      21119 # used to support web clients
+      41112 # The tailscale client gui
+    ];
+  networking.firewall.allowedUDPPorts = 
+    [
+            # rustdesk
+      21116 # is used for the ID registration and heartbeat service
+      41641 # tailscale client
+    ];
+
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+
+  environment.etc."timezone".text = "America/Los_Angeles"; #Add the /etc/timezone file at boot up
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
